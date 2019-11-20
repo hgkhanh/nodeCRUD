@@ -14,5 +14,5 @@ module.exports = (app) => {
     app.delete('/group/:group_id', group.delete);
 
     // Put User into a Group
-    app.put('/group/:group_id/:user_id', group.assignUser);
+    app.put('/group/:group_id/:user_id', group.assignGroup);
 }

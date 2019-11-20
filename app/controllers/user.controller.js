@@ -2,13 +2,24 @@ const User = require('../models/user.model.js');
 
 // Create and Save a new User
 exports.create = (req, res) => {
+    // Validate request
+    if(!req.body.name) {
+        return res.status(400).send({
+            message: "User name can not be empty"
+        });
+    }
+    if(!req.body.email) {
+        return res.status(400).send({
+            message: "User email can not be empty"
+        });
+    }
     // Create a User
     const user = new User({
-        name: req.body.name || 'Untitled User', 
-        email: req.body.email  || 'example@test.com',
+        name: req.body.name, 
+        email: req.body.email,
         address: req.body.address,
         phoneNumber: req.body.phoneNumber,
-        // groups: req.body.groups,
+        groups: req.body.groups,
     });
 
     // Save User in the database
@@ -35,6 +46,10 @@ exports.findOne = (req, res) => {
             name: user.name,
             email: user.email
         });
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error."
+        });
     });
 };
 
@@ -46,6 +61,10 @@ exports.findAll = (req, res) => {
         })
         .then(users => {
             res.send(users);
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Error."
+            });
         });
     }
     else if (req.param.projectID) {
@@ -54,6 +73,10 @@ exports.findAll = (req, res) => {
             User.find({
                 '_id': { $in: project.members }
             })
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Error."
+            });
         });
     }
 };
@@ -62,12 +85,12 @@ exports.findAll = (req, res) => {
 exports.update = (req, res) => {
     // Find user and update it with the request body
     User.findByIdAndUpdate(req.params.user_id, {
-        name: req.body.name || 'Untitled User', 
-        email: req.body.email  || 'example@test.com',
+        name: req.body.name, 
+        email: req.body.email,
         address: req.body.address,
         phoneNumber: req.body.phoneNumber,
-        // groups: req.body.groups,
-    }, {new: true})
+        groups: req.body.groups,
+    }, {new: true, omitUndefined: true})
     .then(user => {
         if(user) {
             res.status(200).send({
@@ -77,6 +100,10 @@ exports.update = (req, res) => {
                 email: user.email
             });
         }
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error."
+        });
     });
 };
 
@@ -84,11 +111,18 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
     User.findByIdAndRemove(req.params.user_id)
     .then(user => {
-        if(user) {
-            res.status(200).send({
-                message: 'User successfully deleted',
-                id: user._id
+        if(!user) {
+            return res.status(404).send({
+                message: "User not found with id " + req.params.user_id
             });
         }
+        res.status(200).send({
+            message: 'User successfully deleted',
+            id: user._id
+        });
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error."
+        });
     });
 };
