@@ -4,7 +4,7 @@ module.exports = (app) => {
     // Create a new User
     app.post('/user', user.create);
 
-    // Retrieve all Users
+    // Retrieve all Users from a group or project
     app.get('/users', user.findAll);
 
     // Retrieve a single User with user_id

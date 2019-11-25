@@ -13,6 +13,7 @@ app.use(bodyParser.json())
 
 // Configuring the database
 const dbConfig = {
+    // url: 'mongodb://mongo:27017/db'
     url: 'mongodb://localhost:27017/db'
 }
 const mongoose = require('mongoose');

@@ -46,7 +46,7 @@ exports.findOne = (req, res) => {
         res.status(200).send({
             id: group._id,
             name: group.name,
-            email: group.email
+            owner: group.owner
         });
     }).catch(err => {
         res.status(500).send({

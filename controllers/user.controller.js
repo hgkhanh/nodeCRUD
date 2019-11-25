@@ -1,4 +1,5 @@
 const User = require('../models/user.model.js');
+const Project = require('../models/project.model.js');
 
 // Create and Save a new User
 exports.create = (req, res) => {
@@ -55,28 +56,56 @@ exports.findOne = (req, res) => {
 
 // Retrieve and return users by groupID or projectID.
 exports.findAll = (req, res) => {
-    if (req.param.groupID) {
+    if (req.query.groupID) {
         User.find({
-            groups: req.params.groupID
+            groups: req.query.groupID
         })
         .then(users => {
-            res.send(users);
+            res.status(200).send(users.map((user) => {
+                return {
+                    "id": user._id
+                }
+            }));
         }).catch(err => {
             res.status(500).send({
                 message: err.message || "Error."
             });
         });
     }
-    else if (req.param.projectID) {
-        Project.findById(req.params.project_id)
+    else if (req.query.projectID) {
+        Project.findById(req.query.projectID)
         .then(project => {
+            if (!project) {
+                return res.status(404).send({
+                    message: 'Project not found with id ' + req.query.projectID
+                });
+            }
             User.find({
-                '_id': { $in: project.members }
-            })
+                "_id": { $in: project.members }
+            }).then(users => {
+                if(users.length === 0) {
+                    return res.status(404).send({
+                        message: 'No user not found with project id ' + req.params.user_id
+                    });            
+                }
+                res.status(200).send(users.map((user) => {
+                    return {
+                        "id": user._id
+                    }
+                }));
+            }).catch(err => {
+                res.status(500).send({
+                    message: err.message || "Error."
+                });
+            });
         }).catch(err => {
             res.status(500).send({
                 message: err.message || "Error."
             });
+        });
+    } else {
+        res.status(500).send({
+            message: "Need groupID or projectID"
         });
     }
 };
